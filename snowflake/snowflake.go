@@ -52,13 +52,20 @@ func NewNode(node int64, epoch int64, nodeBits, stepBits uint8) (*Node, error) {
 func (n *Node) Generate() int64 {
 	n.mu.Lock()
 
-	now := time.Since(n.epoch).Nanoseconds() / 1000000
+	var div int64
+	if n.timeShift < 22 {
+		div = 1000000000
+	} else {
+		div = 1000000
+	}
+
+	now := time.Since(n.epoch).Nanoseconds() / div
 	if now == n.time {
 		n.step = (n.step + 1) & n.stepMask
 
 		if n.step == 0 {
 			for now <= n.time {
-				now = time.Since(n.epoch).Nanoseconds() / 1000000
+				now = time.Since(n.epoch).Nanoseconds() / div
 			}
 		}
 	} else {
@@ -93,12 +100,18 @@ func (n *Node) GenerateBatch(c uint16) []int64 {
 func (n *Node) generateBatchInCurrentTime(c uint16, rt *[]int64) uint16 {
 	var generated = c
 	var startStep = n.step
-	now := time.Since(n.epoch).Nanoseconds() / 1000000
+	var div int64
+	if n.timeShift < 22 {
+		div = 1000000000
+	} else {
+		div = 1000000
+	}
+	now := time.Since(n.epoch).Nanoseconds() / div
 	if now == n.time {
 		startStep = (n.step + 1) & n.stepMask
 		if startStep == 0 {
 			for now <= n.time {
-				now = time.Since(n.epoch).Nanoseconds() / 1000000
+				now = time.Since(n.epoch).Nanoseconds() / div
 			}
 			n.step = 0
 		}

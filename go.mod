@@ -1,4 +1,4 @@
-module github.com/rpcxio/did
+module github.com/joseph-bing-han/did
 
 go 1.13
 
